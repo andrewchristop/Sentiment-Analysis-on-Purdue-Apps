@@ -1,19 +1,25 @@
 import tensorflow as tf
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import matplotlib
 import re
+import string
 import math
 import nltk
 import matplotlib.pyplot as plt
-from tensorflow.keras import datasets, layers, models, optimizers
+from tensorflow.keras import datasets, layers, models, optimizers, utils
 from tensorflow.keras.preprocessing import sequence, text
 from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import WhitespaceTokenizer
+
+#nltk.download("punkt")
 
 def lemmatize_text(text):
   lem = WordNetLemmatizer()
@@ -24,45 +30,52 @@ def lemmatize_text(text):
   return string
 
 data = pd.read_csv('/Users/christopherandrew/Documents/Sentiment-Analysis-on-Purdue-Apps/data/trainTest.csv')
-stop = set(stopwords.words('english'))
+stop = stopwords.words('english') + list(string.punctuation) 
+data['Translated_Review'] = data['Translated_Review'].apply(lambda x: str(x).lower())
+data['Translated_Review'] = data['Translated_Review'].str.replace('[^\w\s]','', regex=True)
 data['Translated_Review'] = data['Translated_Review'].apply(lambda x: ' '.join([word for word in str(x).split() if word not in (stop)]))
+data['Translated_Review'] = data['Translated_Review'].apply(lambda x : ' '.join(x for x in x.split() if x.isdigit()==False))
 data['Translated_Review'] = data.Translated_Review.apply(lemmatize_text)
 
-reviews = data['Translated_Review'].values
-labels = data['Sentiment'].values
-encoder = LabelEncoder()
-encoded_labels = encoder.fit_transform(labels)
-train_sentences, test_sentences, train_labels, test_labels = train_test_split(reviews, encoded_labels, stratify = encoded_labels)
+reviews = data['Translated_Review']
+labels = data['Sentiment']
 
-max_review_length = 200
-embedding_dim = 100
-vocab_size = 20000
-tokenizer = text.Tokenizer(oov_token="<LOV>") 
-tokenizer.fit_on_texts(train_sentences)
-tokenizer.fit_on_texts(test_sentences)
+tokenizer = text.Tokenizer()
+tokenizer.fit_on_texts(reviews)
+labels = labels.astype('category')
 
-train_sequences = tokenizer.texts_to_sequences(train_sentences)
-test_sequences = tokenizer.texts_to_sequences(test_sentences)
+x_train, x_test, y_train, y_test = train_test_split(reviews, labels, test_size=0.2, random_state=42)
 
-train_sentences = sequence.pad_sequences(train_sequences, maxlen=max_review_length)
-test_sentences = sequence.pad_sequences(test_sequences, maxlen=max_review_length)
+num_classes = 3
+batch_size = 100
+max_words = 400
+
+x_train_binary = tokenizer.texts_to_matrix(x_train, mode='binary')
+x_test_binary = tokenizer.texts_to_matrix(x_test, mode='binary')
+
+le = LabelEncoder()
+y_train = le.fit_transform(y_train)
+y_test = le.fit_transform(y_test)
+
+y_train_ohe = utils.to_categorical(y_train, num_classes)
+y_test_ohe = utils.to_categorical(y_test, num_classes)
+
+embedding_dim = 128
+vocab_size = 22000
 
 model = models.Sequential()
-model.add(layers.Embedding(vocab_size, embedding_dim, input_length=max_review_length))
-model.add(layers.Bidirectional(layers.LSTM(64)))
-model.add(layers.Dense(24, activation='relu'))
-model.add(layers.Dense(1, activation='sigmoid'))
+x_train_seq = tokenizer.texts_to_sequences(x_train)
+x_test_seq = tokenizer.texts_to_sequences(x_test)
 
-adam = optimizers.Adam(learning_rate=0.001)
+x_train_seq = sequence.pad_sequences(x_train_seq, maxlen=max_words)
+x_test_seq = sequence.pad_sequences(x_test_seq, maxlen=max_words)
 
-model.compile(loss='binary_crossentropy',
-              optimizer='adam',
-              metrics=['accuracy'])
+model = models.Sequential()
+model.add(layers.Embedding(vocab_size, 250, mask_zero=True))
+model.add(layers.LSTM(128,dropout=0.4, recurrent_dropout=0.4, return_sequences=True))
+model.add(layers.LSTM(64,dropout=0.5, recurrent_dropout=0.5, return_sequences=False))
+model.add(layers.Dense(num_classes,activation='sigmoid'))
+model.compile(loss='binary_crossentropy',optimizer=optimizers.Adam(lr=0.001),metrics=['accuracy'])
+model.summary()
 
-history = model.fit(train_sentences, train_labels, batch_size=32 , epochs=5, verbose=2, validation_split=0.1)
-#print(train_sentences.shape)
-#print(train_labels.shape)
-#print(test_sentences.shape)
-#print(test_labels.shape)
-#print(model.summary())
-
+history = model.fit(x_train_seq, y_train_ohe, epochs=3, verbose=1)
