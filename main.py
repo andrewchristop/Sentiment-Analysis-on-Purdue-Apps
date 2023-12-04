@@ -8,6 +8,7 @@ import string
 import math
 import nltk
 import matplotlib.pyplot as plt
+from pathlib import Path
 from tensorflow.keras import datasets, layers, models, optimizers, utils
 from tensorflow.keras.preprocessing import sequence, text
 from sklearn.model_selection import train_test_split
@@ -63,19 +64,25 @@ y_test_ohe = utils.to_categorical(y_test, num_classes)
 embedding_dim = 128
 vocab_size = 22000
 
-model = models.Sequential()
+#model = models.Sequential()
 x_train_seq = tokenizer.texts_to_sequences(x_train)
 x_test_seq = tokenizer.texts_to_sequences(x_test)
 
 x_train_seq = sequence.pad_sequences(x_train_seq, maxlen=max_words)
 x_test_seq = sequence.pad_sequences(x_test_seq, maxlen=max_words)
 
-model = models.Sequential()
-model.add(layers.Embedding(vocab_size, 250, mask_zero=True))
-model.add(layers.LSTM(128,dropout=0.4, recurrent_dropout=0.4, return_sequences=True))
-model.add(layers.LSTM(64,dropout=0.5, recurrent_dropout=0.5, return_sequences=False))
-model.add(layers.Dense(num_classes,activation='sigmoid'))
-model.compile(loss='binary_crossentropy',optimizer=optimizers.Adam(lr=0.001),metrics=['accuracy'])
-model.summary()
+path = Path('./saved_models/model.h5')
 
-history = model.fit(x_train_seq, y_train_ohe, epochs=3, verbose=1)
+
+if(path.is_file() == False):
+  model = models.Sequential()
+  model.add(layers.Embedding(vocab_size, 250, mask_zero=True))
+  model.add(layers.LSTM(128,dropout=0.4, recurrent_dropout=0.4, return_sequences=True))
+  model.add(layers.LSTM(64,dropout=0.5, recurrent_dropout=0.5, return_sequences=False))
+  model.add(layers.Dense(num_classes,activation='sigmoid'))
+  model.compile(loss='binary_crossentropy',optimizer=optimizers.Adam(lr=0.001),metrics=['accuracy'])
+  model.summary()
+  history = model.fit(x_train_seq, y_train_ohe, epochs=3, verbose=1)
+  model.save('./saved_models/model.h5') 
+
+model = models.load_model('./saved_models/model.h5')
