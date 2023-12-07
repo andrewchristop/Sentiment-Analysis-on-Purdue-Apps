@@ -7,7 +7,7 @@ import re
 import string
 import math
 import nltk
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 from pathlib import Path
 from tensorflow.keras import datasets, layers, models, optimizers, utils
 from tensorflow.keras.preprocessing import sequence, text
@@ -19,6 +19,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import WhitespaceTokenizer
+from plot import *
 
 #nltk.download("punkt")
 
@@ -31,12 +32,18 @@ def lemmatize_text(text):
   return string
 
 data = pd.read_csv('/Users/christopherandrew/Documents/Sentiment-Analysis-on-Purdue-Apps/data/trainTest.csv')
+data = data.drop(data[data['Sentiment'] == 'Neutral'].index)
 stop = stopwords.words('english') + list(string.punctuation) 
 data['Translated_Review'] = data['Translated_Review'].apply(lambda x: str(x).lower())
 data['Translated_Review'] = data['Translated_Review'].str.replace('[^\w\s]','', regex=True)
 data['Translated_Review'] = data['Translated_Review'].apply(lambda x: ' '.join([word for word in str(x).split() if word not in (stop)]))
 data['Translated_Review'] = data['Translated_Review'].apply(lambda x : ' '.join(x for x in x.split() if x.isdigit()==False))
 data['Translated_Review'] = data.Translated_Review.apply(lemmatize_text)
+
+positive = data[data['Sentiment'].str.contains('Positive')]
+negative = data[data['Sentiment'].str.contains('Negative')]
+#word_cloud(positive['Translated_Review'].str.cat(sep=' '))
+#word_cloud(negative['Translated_Review'].str.cat(sep=' '))
 
 reviews = data['Translated_Review']
 labels = data['Sentiment']
@@ -62,7 +69,7 @@ y_train_ohe = utils.to_categorical(y_train, num_classes)
 y_test_ohe = utils.to_categorical(y_test, num_classes)
 
 embedding_dim = 128
-vocab_size = 22000
+vocab_size = 21000
 
 #model = models.Sequential()
 x_train_seq = tokenizer.texts_to_sequences(x_train)
@@ -86,3 +93,24 @@ if(path.is_file() == False):
   model.save('./saved_models/model.h5') 
 
 model = models.load_model('./saved_models/model.h5')
+
+sentence = ["Good app", "This app is fantastic", "This app is terrible", "This app is so useless"]
+sentence_sequences = tokenizer.texts_to_sequences(sentence)
+padded_sentences = sequence.pad_sequences(sentence_sequences, maxlen=max_words)
+
+# Make predictions using the loaded model
+predictions = model.predict(padded_sentences)
+
+print(predictions)
+
+# Convert predictions to labels (positive, negative, neutral)
+predicted_labels = np.argmax(predictions, axis=1)
+
+# Decode the predicted labels using the LabelEncoder
+decoded_predicted_labels = le.inverse_transform(predicted_labels)
+
+# Display the results
+for i, review in enumerate(sentence):
+    print(f"Review: {review}")
+    print(f"Predicted Sentiment: {decoded_predicted_labels[i]}")
+    print()
