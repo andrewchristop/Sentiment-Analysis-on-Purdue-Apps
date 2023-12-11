@@ -94,23 +94,62 @@ if(path.is_file() == False):
 
 model = models.load_model('./saved_models/model.h5')
 
-sentence = ["Good app", "This app is fantastic", "This app is terrible", "This app is so useless"]
-sentence_sequences = tokenizer.texts_to_sequences(sentence)
+#sentence = ["Good app", "This app is fantastic", "This app is terrible", "This app is so useless"]
+sentence = pd.read_csv('/Users/christopherandrew/Documents/Sentiment-Analysis-on-Purdue-Apps/data/actualData.csv')
+app = sentence['app'].values
+rev = sentence['review'].values
+sentence_sequences = tokenizer.texts_to_sequences(rev)
 padded_sentences = sequence.pad_sequences(sentence_sequences, maxlen=max_words)
 
 # Make predictions using the loaded model
 predictions = model.predict(padded_sentences)
 
-print(predictions)
-
-# Convert predictions to labels (positive, negative, neutral)
 predicted_labels = np.argmax(predictions, axis=1)
 
 # Decode the predicted labels using the LabelEncoder
 decoded_predicted_labels = le.inverse_transform(predicted_labels)
 
+p_app_pos = 0
+p_mob_pos = 0
+p_ath_pos = 0
+p_rec_pos = 0
+p_gui_pos = 0
+
+p_app_neg = 0
+p_mob_neg = 0
+p_ath_neg = 0
+p_rec_neg = 0
+p_gui_neg = 0
+
 # Display the results
-for i, review in enumerate(sentence):
-    print(f"Review: {review}")
+for i in range(len(sentence)):
+    print(f"App: {app[i]}")
+    print(f"Review: {rev[i]}")
     print(f"Predicted Sentiment: {decoded_predicted_labels[i]}")
+    
+    if (decoded_predicted_labels[i] == "Positive"):
+      if (app[i] == "Purdue Guide"):
+        p_gui_pos = p_gui_pos + 1
+      elif(app[i] == "Purdue App"):
+        p_app_pos = p_app_pos + 1
+      elif(app[i] == "Purdue Athletics"):
+        p_ath_pos = p_ath_pos + 1
+      elif(app[i] == "Purdue RecWell"):
+        p_rec_pos = p_rec_pos + 1
+      else:
+        p_mob_pos = p_mob_pos + 1
+    else:
+      if (app[i] == "Purdue Guide"):
+        p_gui_neg = p_gui_neg + 1
+      elif(app[i] == "Purdue App"):
+        p_app_neg = p_app_neg + 1
+      elif(app[i] == "Purdue Athletics"):
+        p_ath_neg = p_ath_neg + 1
+      elif(app[i] == "Purdue RecWell"):
+        p_rec_neg = p_rec_neg + 1
+      else:
+        p_mob_neg = p_mob_neg + 1
     print()
+
+bar_pos(p_gui_pos, p_app_pos, p_ath_pos, p_rec_pos, p_mob_pos)
+bar_neg(p_gui_neg, p_app_neg, p_ath_neg, p_rec_neg, p_mob_neg)

@@ -9,3 +9,27 @@ def word_cloud(text):
   plt.axis("off")
   plt.tight_layout(pad = 0)
   plt.show()
+
+
+def bar_pos(gui, app, ath, rec, mob):
+  fig, ax = plt.subplots()
+  apps = ['Purdue Guide', 'Purdue App', 'Purdue Athletics', 'Purdue RecWell', 'Purdue Mobile App']
+  freq = [gui, app, ath, rec, mob]
+
+  ax.bar(apps, freq)
+  ax.set_ylabel('Frequency')
+  ax.set_title('Purdue Apps with Positive Reviews')
+
+  plt.show()
+
+def bar_neg(gui, app, ath, rec, mob):
+  fig, ax = plt.subplots()
+  apps = ['Purdue Guide', 'Purdue App', 'Purdue Athletics', 'Purdue RecWell', 'Purdue Mobile App']
+  freq = [gui, app, ath, rec, mob]
+
+  ax.bar(apps, freq)
+  ax.set_ylabel('Frequency')
+  ax.set_title('Purdue Apps with Negative Reviews')
+
+  plt.show()
+
