@@ -1,4 +1,4 @@
-# Sentiment Analysis using LSTM
+# Sentiment Analysis using LSTM on Purdue-based Applications
 
 As Purdue’s student body grows year after year, the university felt it necessary to build applications tied to certain campus services to provide students and faculty better experience. We have managed to find 5 Purdue published applications from the Apple App Store at the time of doing this project. They are:
 
