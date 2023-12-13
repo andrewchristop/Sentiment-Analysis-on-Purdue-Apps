@@ -14,3 +14,6 @@ To install dependencies please type in `pip install -r requirements.txt` from th
 
 
 To run the code please execute `python3 main.py`
+
+
+**DEPENDENCIES LISTED in requirements.txt may not be exhaustive. Please follow instructions provided by the interpreter to resolve issues with dependencies**
