@@ -34,7 +34,7 @@ def lemmatize_text(text):
   return string
 
 #Loads training data 
-data = pd.read_csv('/Users/christopherandrew/Documents/Sentiment-Analysis-on-Purdue-Apps/data/trainTest.csv')
+data = pd.read_csv('./data/trainTest.csv')
 data = data.drop(data[data['Sentiment'] == 'Neutral'].index) #Excludes reviews that are neutral in tone
 stop = stopwords.words('english') + list(string.punctuation) #Defines stopwords to be excluded
 data['Translated_Review'] = data['Translated_Review'].apply(lambda x: str(x).lower()) #Converts all reviews to lower case
@@ -104,7 +104,7 @@ if(path.is_file() == False):
 model = models.load_model('./saved_models/model.h5')
 
 #Loading of the actual data gathered from the survey
-sentence = pd.read_csv('/Users/christopherandrew/Documents/Sentiment-Analysis-on-Purdue-Apps/data/actualData.csv') 
+sentence = pd.read_csv('./data/actualData.csv') 
 app = sentence['app'].values
 rev = sentence['review'].values
 sentence_sequences = tokenizer.texts_to_sequences(rev)
