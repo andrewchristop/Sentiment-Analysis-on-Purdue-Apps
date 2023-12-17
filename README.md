@@ -10,7 +10,7 @@ As Purdue’s student body grows year after year, the university felt it necessa
 
 Given that Purdue had to maintain all 5 applications, and reading the somewhat mixed reviews from the AppStore, we suspected that Purdue’s resources (both human and technical) may be spread too thin. Now it is entirely possible that Purdue may have made leaps and bounds in improving user experience with these applications, however, the reviews were rather outdated making it impossible for us to confirm this fact. As such, we decided to gauge user responses on these applications by using Google Forms to gather the most recent feedback on the performance of these applications. Our use of sentiment analysis to categorize reviews as either positive or negative in tone hopes to acknowledge the significant role that digital applications and services play in contemporary student life. We hope that our findings can provide Purdue affiliated developers with actionable insights on the various components of the app that should be kept in response to the positive reviews and ones that needed to be done away with or improved with regards to user reviews that are negative in tone. 
 
-Models are already pre-compiled and saved in the HDF5 (.h5) format so you won't have to run all 3 epochs which will take approximately 45 minutes to run altogether. Training and testing accuracy are in the high 90%. Last known estimates put it at 97%. Below is an excerpt gathered from the program output taken from the LSTM model predicting actual data from the surveys that we gathered.
+Models are already pre-compiled and saved in the HDF5 (.h5) format so you won't have to run all 3 epochs which will take approximately 45 minutes to run altogether. Training and testing accuracy are in the high 90%. Last known estimates put the train-test accuracy around 96-97%. Below is an excerpt gathered from the program output taken from the LSTM model predicting actual data from the surveys that we gathered.
 
 ```
 App: Purdue RecWell
@@ -45,7 +45,7 @@ Please feel free to introduce your own set of data to have the model predict a s
 
 
 
-To install dependencies please type in `pip install -r requirements.txt` from the project directory
+To install dependencies please execute `pip install -r requirements.txt` from the project directory
 
 
 To run the code please execute `python3 main.py`
